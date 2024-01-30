@@ -28,16 +28,21 @@ fi
 # Edit your project files here
 echo "Formatting files..."
 SOLUTION_FILE=$(find . -type f -name "*.sln")
-if [[ "$OSTYPE" == "msys"* ]]; then
-    # Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
-    ./.git/hooks/resharper/cleanupcode.exe --profile="Built-in: Reformat Code" $SOLUTION_FILE --include="$INCLUDE_STRING"
-elif [[ "$OSTYPE" == "cygwin" ]]; then
-    #Cygwin terminal emulator
-    ./.git/hooks/resharper/cleanupcode.exe --profile="Built-in: Reformat Code" $SOLUTION_FILE --include="$INCLUDE_STRING"
-else
-    sh ./.git/hooks/resharper/cleanupcode.sh --profile="Built-in: Reformat Code" $SOLUTION_FILE --include="$INCLUDE_STRING"
-fi
+DOTSETTING_FILE=$(find . -type f -name "*.DotSettings*")
 
+echo "SOLUTION_FILE: '$SOLUTION_FILE'"
+
+if [[ ! -z "$SOLUTION_FILE" && "$OSTYPE" == "msys"* ]]; then
+    # Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
+    ./.git/hooks/resharper/cleanupcode.exe --settings="$DOTSETTING_FILE" $SOLUTION_FILE --include="$INCLUDE_STRING"
+elif [[ ! -z "$SOLUTION_FILE" && "$OSTYPE" == "cygwin" ]]; then
+    # Cygwin terminal emulator
+    ./.git/hooks/resharper/cleanupcode.exe --settings="$DOTSETTING_FILE" $SOLUTION_FILE --include="$INCLUDE_STRING"
+elif [[ ! -z "$SOLUTION_FILE" ]]; then
+    sh ./.git/hooks/resharper/cleanupcode.sh --settings="$DOTSETTING_FILE" $SOLUTION_FILE --include="$INCLUDE_STRING"
+else 
+    echo "Solution not found"
+fi
 
 # Restage files
 echo "Restaging files: $STAGED_FILES"
